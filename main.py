@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.routes import signup
+from app.routes import signup, fetchurl
 
 app = FastAPI(
     description="Sauve ai"
@@ -8,6 +8,8 @@ app = FastAPI(
 
 
 app.include_router(signup.router)
+app.include_router(fetchurl.router)
+
 
 
 @app.get("/")

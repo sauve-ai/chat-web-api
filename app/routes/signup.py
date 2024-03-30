@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 from http import HTTPStatus
 from app.db_utils import models, utils
 from app.db_utils.database import SessionLocal, engine
-from app.routes import schema
-from app.routes.utils import hash_pass
+from app.services import schema
+from app.services.utils import hash_pass
 
 
 models.Base.metadata.create_all(bind=engine)
