@@ -20,15 +20,6 @@ def get_db():
     finally:
         db.close()
 
-# @router.post('/', status_code=HTTPStatus.CREATED,response_model=schema.UserOutput)
-# def create_users(user:schema.CreateUser, db:Session = Depends(get_db)):
-#     hashed_pass = hash_pass(user.password)
-#     user.password = hashed_pass
-#     new_user = models.User(**user.dict())
-#     db.add(new_user)
-#     db.commit()
-#     db.refresh(new_user)
-#     return new_user
 
 @router.post("/api/v1/signup/", tags=["signup"], status_code=HTTPStatus.CREATED, response_model=schema.UserOutput)
 def create_user(
