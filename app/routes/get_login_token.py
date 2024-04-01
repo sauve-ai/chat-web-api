@@ -4,9 +4,12 @@ from typing import Annotated
 
 from sqlalchemy.orm import Session
 
-from app.services import utils, create_access_token
+from app.services import utils, create_access_token, setting
 from app.routes.signup import get_db
 from app.services.schema import Token
+
+from datetime import datetime, timedelta, timezone
+
 
 routes = APIRouter()
 
@@ -28,13 +31,13 @@ def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+    access_token_expires = timedelta(minutes=setting.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token.create_access_token(
         data={
              "sub": user.username,
              "pass": user.password
              }, 
-             expires_delta=None
+             expires_delta=access_token_expires
     )
 
     return Token(access_token=access_token, token_type="bearer")
