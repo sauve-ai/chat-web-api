@@ -25,24 +25,19 @@ async def get_current_user(
     try:
         print("create user")
         payload = jwt.decode(token, setting.SECRET_KEY, algorithms=[setting.ALGORITHM])
-        print(payload)
-        username: str = payload.get("sub")
-        password: str = payload.get("pass")
+        user_id: int = int(payload.get("sub"))
 
-        if username is None:
-            raise credentials_exception
-        
-        if password is None:
+        if user_id is None:
             raise credentials_exception
         
         ##TODO: Validate the user password
 
-        token_data_username = username
+        token_data_username = user_id
 
     except Exception as e:
         print(e)
         raise credentials_exception
-    user = utils.get_user_by_user_name(db=db, username=username)
+    user = utils.get_user_by_user_id(db=db, user_id=user_id)
     
     if user is None:
         raise credentials_exception
