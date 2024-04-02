@@ -9,18 +9,19 @@ def get_user_by_user_id(db: Session, user_id: int):
 def get_user_by_user_name(db: Session, username: int):
     return db.query(models.User).filter(models.User.username == username).first()
 
+def get_user_by_email(db: Session, email: int):
+    return db.query(models.User).filter(models.User.email == email).first()
+
 def create_user(
         db: Session,
         email: str,
         password: str,
         username: str,
-        user_id: int
 ):
     """Create a user for the signup"""
     ##todo: create a hash for the user
     db_user = models.User(
         email=email,
-        user_id=user_id,
         password=password,
         username=username
     )

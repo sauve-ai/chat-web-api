@@ -3,7 +3,6 @@ from typing import Optional
 import datetime
 
 class CreateUser(BaseModel):
-    user_id: int
     email: str
     password: str
     username: str
