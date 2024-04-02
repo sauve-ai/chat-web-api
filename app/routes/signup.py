@@ -31,8 +31,14 @@ def create_user(
         db=db,
         email=user.email
     )
+    db_user_name = utils.get_user_by_user_name(
+        db=db,
+        username=user.username
+    )
+    if db_user_name:
+        raise HTTPException(status_code=400, detail="Username already taken")
     if db_user:
-        raise HTTPException(status_code=400, detail="Email already present")
+        raise HTTPException(status_code=400, detail="Email already exists")
     hashed_pass = hash_pass(user.password)
     user.password = hashed_pass
     db_user = utils.create_user(
