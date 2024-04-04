@@ -1,5 +1,5 @@
-from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import Depends, FastAPI, HTTPException, status, Request
+from fastapi.security import HTTPAuthorizationCredentials
 
 from typing import Annotated
 
@@ -9,13 +9,13 @@ from jose import JWTError, jwt
 
 from app.services import setting
 from app.db_utils import utils
-from app.routes.signup import get_db
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-async def get_current_user(
-        token: Annotated[str, Depends(oauth2_scheme)],
-        db: Session = Depends(get_db)
+
+def get_current_user(
+        credentials: str,
+        db
         ):
     credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -24,9 +24,9 @@ async def get_current_user(
     )
     try:
         print("create user")
-        payload = jwt.decode(token, setting.SECRET_KEY, algorithms=[setting.ALGORITHM])
+        payload = jwt.decode(credentials, setting.SECRET_KEY, algorithms=[setting.ALGORITHM])
         user_id: int = int(payload.get("sub"))
-
+        print(user_id)
         if user_id is None:
             raise credentials_exception
         
