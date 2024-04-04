@@ -11,3 +11,9 @@ class User(Base):
     username = Column(String, unique=False, index=True)
     password = Column(String)
  
+
+# class Class(Base):
+#     __tablename__='classes'
+#     id= Column(Integer,primary_key=True, index=True)
+#     name = Column(String(225), index=True)
+#     teacher_id = Column(Integer, ForeignKey("teachers.id"))
