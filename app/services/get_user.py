@@ -38,7 +38,7 @@ def get_current_user(
         print(e)
         raise credentials_exception
     user = utils.get_user_by_user_id(db=db, user_id=user_id)
-    
+    print(user)
     if user is None:
         raise credentials_exception
-    return user
+    return user_id
