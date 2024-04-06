@@ -28,6 +28,54 @@ class JWTBearer(HTTPBearer):
 
 
 
+##get request
+@router.get("/api/v1/fetchurl/", tags=["urls"], status_code=HTTPStatus.OK)
+async def fetch_url(
+        current_user_credential: str = Depends(JWTBearer()),
+        db: Session = Depends(get_db)
+
+):
+    """Get request for user url limit"""
+
+    ##get user information from JWT token
+    user_id =  get_user.get_current_user(
+        credentials= current_user_credential,
+        db= db
+    )
+
+    ##query request table for url
+    db_request_user = get_user_by_userid_request_table(
+        db= db,
+        user_id= user_id
+    ) 
+
+    if not db_request_user:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN,
+            detail="No information about the user"
+        )
+    else:
+        db_plan = db_request_user.plan_id
+        if db_plan == 0:
+            response = {
+                "success": True,
+                "Fetch_api_count": db_request_user.request - 1,
+                "Fetch_api_limit":5
+            }
+
+            return response
+        else:
+
+            ##for premium users
+            response = {
+                "success": True,
+                "Fetch_api_count": "unlimited",
+                "Fetch_api_limit":"unlimited"
+            }
+
+            return response
+
+
 @router.post("/api/v1/fetchurl/", tags=["urls"], status_code=HTTPStatus.OK)
 async def fetch_url(
     url_request: URLRequest,
