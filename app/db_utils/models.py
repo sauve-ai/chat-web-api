@@ -35,3 +35,13 @@ class FetchUrl(Base):
     plan_id = Column(Integer, index=True)
 
 
+class ChatbotPlan(Base):
+    __tablename__ = "chatbotplan"
+
+    user = relationship("User", back_populates="fetchurl_class")
+    user_id = Column(Integer, ForeignKey("users.user_id"), primary_key=True)
+    request = Column(Integer, index=True)
+    plan_id = Column(Integer, index=True)
+
+
+

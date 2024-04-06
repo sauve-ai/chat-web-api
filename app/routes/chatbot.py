@@ -1,46 +1,38 @@
 from typing import AsyncGenerator, NoReturn
-
-from dotenv import load_dotenv
-from fastapi import APIRouter, WebSocket
+from fastapi import APIRouter, WebSocket, Depends
+from sqlalchemy.orm import Session
 from fastapi.responses import HTMLResponse
-from openai import AsyncOpenAI
+from app.services.openai_response import get_ai_response
+from app.services.schema import Token
+from app.routes.signup import get_db
+from app.services import get_user
+from app.db_utils.utils import (
+                                get_user_by_userid_request_table,
+                                create_user_plan_request
+                                )
+from app.services.utils import JWTBearer
 
 routes = APIRouter()
-client = AsyncOpenAI()
-async def get_ai_response(message: str) -> AsyncGenerator[str, None]:
-    """
-    OpenAI Response
-    """
-    response = await client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You are a helpful assistant, skilled in explaining "
-                    "complex concepts in simple terms."
-                ),
-            },
-            {
-                "role": "user",
-                "content": message,
-            },
-        ],
-        stream=True,
-    )
-
-    all_content = ""
-    async for chunk in response:
-        content = chunk.choices[0].delta.content
-        if content:
-            all_content += content
-
 
 @routes.post("/token")
-async def websocket_endpoint(websocket: WebSocket) -> NoReturn:
+async def websocket_endpoint(
+    websocket: WebSocket,
+    current_user_credential: str = Depends(JWTBearer()),
+    db: Session = Depends(get_db)
+    ) :
     """
     Websocket for AI responses
     """
+    user_id =  get_user.get_current_user(
+        credentials= current_user_credential,
+        db= db
+    )
+    print("This is the user_id", user_id)
+    ##getuser from table
+    # db_request_user = get_user_by_userid_request_table(
+    #     db= db,
+    #     user_id= user_id
+    # )
     await websocket.accept()
     while True:
         message = await websocket.receive_text()
