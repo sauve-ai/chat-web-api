@@ -6,23 +6,23 @@ from sqlalchemy.orm import Session
 
 from app.services import utils, create_access_token, setting
 from app.routes.signup import get_db
-from app.services.schema import Token
+from app.services.schema import Token,UserLogin
 
 from datetime import datetime, timedelta, timezone
 
 
 routes = APIRouter()
 
-@routes.post("/token")
+@routes.post("/api/v1/token")
 def login_for_access_token(
-        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+        login_data: UserLogin,
         db: Session = Depends(get_db)
 ):
     """Get the jwt token for login"""
     user = utils.authenticate_user(
         db= db,
-        username=form_data.username,
-        password=form_data.password
+        username=login_data.username,
+        password=login_data.password
     )
 
     if not user:
@@ -34,8 +34,7 @@ def login_for_access_token(
     access_token_expires = timedelta(minutes=setting.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token.create_access_token(
         data={
-             "sub": user.username,
-             "pass": user.password
+             "sub": str(user.user_id),
              }, 
              expires_delta=access_token_expires
     )

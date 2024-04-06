@@ -27,17 +27,22 @@ def create_user(
     db: Session = Depends(get_db)
 ):
     """Create a user if not present"""
-    db_user = utils.get_user_by_user_id(
+    db_user = utils.get_user_by_email(
         db=db,
-        user_id=user.user_id
+        email=user.email
     )
+    db_user_name = utils.get_user_by_user_name(
+        db=db,
+        username=user.username
+    )
+    if db_user_name:
+        raise HTTPException(status_code=400, detail="Username already taken")
     if db_user:
-        raise HTTPException(status_code=400, detail="Email already present")
+        raise HTTPException(status_code=400, detail="Email already exists")
     hashed_pass = hash_pass(user.password)
     user.password = hashed_pass
     db_user = utils.create_user(
         db = db,
-        user_id = user.user_id,
         username = user.username,
         password = user.password,
         email = user.email
