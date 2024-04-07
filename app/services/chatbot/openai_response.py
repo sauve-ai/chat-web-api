@@ -8,8 +8,9 @@ from dotenv import load_dotenv
 from openai import AsyncOpenAI
 
 load_dotenv()
-openai.api_key = os.environ.get("OPENAI_API_KEY")
 client = AsyncOpenAI()
+
+
 async def get_ai_response(message: str):
     """
     OpenAI Response
@@ -37,3 +38,4 @@ async def get_ai_response(message: str):
         content = chunk.choices[0].delta.content
         if content:
             all_content += content
+            yield all_content

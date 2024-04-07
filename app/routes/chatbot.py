@@ -1,8 +1,8 @@
 from typing import AsyncGenerator, NoReturn
-from fastapi import APIRouter, WebSocket, Depends
+from fastapi import APIRouter, WebSocket, Depends, HTTPException, WebSocketDisconnect
 from sqlalchemy.orm import Session
 from fastapi.responses import HTMLResponse
-from app.services.openai_response import get_ai_response
+from app.services.chatbot.openai_response import get_ai_response
 from app.services.schema import Token
 from app.routes.signup import get_db
 from app.services import get_user
@@ -14,7 +14,7 @@ from app.services.utils import JWTBearer
 
 routes = APIRouter()
 
-@routes.post("/token")
+@routes.post("/chat")
 async def websocket_endpoint(
     websocket: WebSocket,
     current_user_credential: str = Depends(JWTBearer()),
@@ -27,14 +27,28 @@ async def websocket_endpoint(
         credentials= current_user_credential,
         db= db
     )
-    print("This is the user_id", user_id)
-    ##getuser from table
+    print("[USER ID] for chatbot verification: ", user_id)
+    # #getuser from table
     # db_request_user = get_user_by_userid_request_table(
     #     db= db,
     #     user_id= user_id
     # )
-    await websocket.accept()
-    while True:
-        message = await websocket.receive_text()
-        async for text in get_ai_response(message):
-            await websocket.send_text(text)
+    # USER ID VERIFICATION AND PLAN extraction
+    plan = extract_chatbot_plan(user_id)
+    USER_LIMIT = 15
+    message_count = 0
+    is_premium_user = False if plan=="Free" else "True"
+    try:
+        await websocket.accept()
+
+        async for message in websocket.iter_text():
+            message_count +=1
+            message_counts[user_id] = message_count
+            print(f"Received message {message_count} from user {user_id}: {message}")
+            if not is_premium_user and message_count > USER_LIMIT:
+                await websocket.send_json({"detail": "Message limit reached"})
+                await websocket.close()
+                return HTTPException(status_code=429, detail="Message limit reached")
+    except WebSocketDisconnect:
+        print(f"[WEBSOCKET] Connection closed for: {user_id} Total Message recieved: {message_count}")
+        ## Implement update user databse of count
