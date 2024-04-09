@@ -27,3 +27,6 @@ class UserOutput(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+class URLRequest(BaseModel):
+    base_url: str

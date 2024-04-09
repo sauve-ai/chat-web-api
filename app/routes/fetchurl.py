@@ -12,25 +12,15 @@ from app.db_utils.utils import (
                                 get_user_by_userid_request_table,
                                 create_user_plan_request
                                 )
+from app.services.schema import URLRequest
+from app.services.utils import JWTBearer
 
 router  = APIRouter()
 
-## TODO: define in schema
-class URLRequest(BaseModel):
-    base_url: str
-
-## TODO: Define in services
-class JWTBearer(HTTPBearer):
-   async def __call__(self, request: Request):
-       credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
-       if credentials:
-           return credentials.credentials
-
-
 
 ##get request
-@router.get("/api/v1/fetchurl/", tags=["urls"], status_code=HTTPStatus.OK)
-async def fetch_url(
+@router.get("/api/v1/count/", tags=["urls"], status_code=HTTPStatus.OK)
+async def count(
         current_user_credential: str = Depends(JWTBearer()),
         db: Session = Depends(get_db)
 

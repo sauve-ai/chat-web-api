@@ -13,6 +13,7 @@ class User(Base):
     password = Column(String)
     plan_class = relationship("Plan", back_populates="user")
     fetchurl_class = relationship("FetchUrl", back_populates="user")
+    chatbot_plan_class = relationship("ChatbotPlan", back_populates="user")
  
 
 class Plan(Base):
@@ -33,5 +34,15 @@ class FetchUrl(Base):
     user_id = Column(Integer, ForeignKey("users.user_id"), primary_key=True)
     request = Column(Integer, index=True)
     plan_id = Column(Integer, index=True)
+
+
+class ChatbotPlan(Base):
+    __tablename__ = "chatbotplan"
+
+    user = relationship("User", back_populates="chatbot_plan_class")
+    user_id = Column(Integer, ForeignKey("users.user_id"), primary_key=True)
+    chat_request = Column(Integer, index=True)
+    plan_id = Column(Integer, index=True)
+
 
 

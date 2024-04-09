@@ -1,6 +1,8 @@
 from passlib.context import CryptContext
 from app.db_utils.database import SessionLocal, engine
 from app.db_utils import utils
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Request
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -34,3 +36,9 @@ def authenticate_user(
     if not verify_password(password, db_user.password):
         return False
     return db_user
+
+class JWTBearer(HTTPBearer):
+   async def __call__(self, request: Request):
+       credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
+       if credentials:
+           return credentials.credentials
