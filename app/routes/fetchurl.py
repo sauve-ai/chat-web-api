@@ -29,7 +29,7 @@ class JWTBearer(HTTPBearer):
 
 
 ##get request
-@router.get("/api/v1/fetchurl/", tags=["urls"], status_code=HTTPStatus.OK)
+@router.get("/api/v1/count/", tags=["urls"], status_code=HTTPStatus.OK)
 async def fetch_url(
         current_user_credential: str = Depends(JWTBearer()),
         db: Session = Depends(get_db)
@@ -89,13 +89,11 @@ async def fetch_url(
         credentials= current_user_credential,
         db= db
     )
-    print("This is the user_id", user_id)
     ##getuser from table
     db_request_user = get_user_by_userid_request_table(
         db= db,
         user_id= user_id
     )
-    print("This is the db_user: ",db_request_user)
     if not db_request_user:
         ##create user plan
         user_plan = create_user_plan_request(
@@ -104,7 +102,6 @@ async def fetch_url(
             db= db,
             plan_id=0
         )
-        print(user_plan)
     else:
         ## increase the request for the particular user
         db_plan = db_request_user.plan_id
@@ -115,7 +112,6 @@ async def fetch_url(
                 db_request_user.request+=1
                 db.add(db_request_user)
                 db.commit()
-                print("database updateed")
             
             else:
                 raise HTTPException(
