@@ -19,8 +19,8 @@ router  = APIRouter()
 
 
 ##get request
-@router.get("/api/v1/fetchurl/", tags=["urls"], status_code=HTTPStatus.OK)
-async def fetch_url(
+@router.get("/api/v1/count/", tags=["urls"], status_code=HTTPStatus.OK)
+async def count(
         current_user_credential: str = Depends(JWTBearer()),
         db: Session = Depends(get_db)
 
