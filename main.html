@@ -38,7 +38,7 @@
                 mode: 'dark'
             },
         });
-        const WS = new WebSocket("ws://localhost:8000/api/v1/chat");
+        const WS = new WebSocket("ws://localhost:8000/ws");
 
         function App() {
             const [response, setResponse] = React.useState("");
