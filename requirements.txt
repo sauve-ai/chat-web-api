@@ -7,3 +7,19 @@ requests==2.31.0
 beautifulsoup4==4.12.3
 python-multipart==0.0.9
 python-jose==3.3.0
+openai==1.14.3
+faiss-cpu==1.8.0
+html2text==2024.2.26
+# pandas
+# openai
+# # streamlit
+# faiss-cpu
+# beautifulsoup4
+# sentencepiece
+# sentence-transformers
+# python-dotenv
+# langchain
+# requests
+# streamlit-chat
+# html2text
+# pinecone-client

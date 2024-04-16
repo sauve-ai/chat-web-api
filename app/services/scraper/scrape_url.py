@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import pdb
-# from src.add_image_markdown import get_content
+from app.services.chatbot.extract_markdown import get_content
 
 class ScrapeWebPage:
     """Scrapes the Web page and processes it as required.
@@ -54,8 +54,8 @@ class ScrapeWebPage:
         new_url_list = [url for url in new_url_list if base_url in url]
         return new_url_list
 
-        
-    def get_page_contents_markdown(self, url_list:list):
+    @staticmethod    
+    def get_page_contents_markdown(url_list:list):
         pages=[]
         for link in url_list:
             try:
