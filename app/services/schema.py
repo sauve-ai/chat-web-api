@@ -30,3 +30,7 @@ class Token(BaseModel):
 
 class URLRequest(BaseModel):
     base_url: str
+
+class chatbotrequest(BaseModel):
+    link: str
+    query: str

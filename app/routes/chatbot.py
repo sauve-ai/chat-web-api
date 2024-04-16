@@ -25,6 +25,7 @@ from app.services.chatbot import openai_response
 from app.services.chatbot import vector_store
 from app.services.scraper.scrape_url import ScrapeWebPage
 from app.services.chatbot.get_base_url import get_base_url
+from app.services.schema import chatbotrequest
 
 import os
 
@@ -37,13 +38,13 @@ embeddings = HuggingFaceEmbeddings(model_name = "sentence-transformers/msmarco-d
 
 @routes.post("/api/v1/chat/", tags=["chatbot"], status_code=HTTPStatus.OK)
 async def chat(
-    link: str,
-    query: str,
+    chatData:chatbotrequest,
+  
     current_user_credential: str = Depends(JWTBearer()),
     db: Session = Depends(get_db)
 ):
     try:
-        base_url, url_name = get_base_url(link)
+        base_url, url_name = get_base_url(chatData.link)
     except Exception as e:
         raise HTTPException(
                         status_code= status.HTTP_404,
@@ -88,7 +89,8 @@ async def chat(
                         detail="Max limit of request exceed.",
                     )
             
-
+    # todo:
+    # user id need to be checked
 
     faiss_ = os.path.join("faiss_index", f"{db_chatbot_plan_user_id.user_id}_{url_name}")
     print(faiss_)
@@ -98,7 +100,7 @@ async def chat(
         ## save the fasiis index
     else:
         print("here")
-        url_scrapper =  ScrapeWebPage(link)
+        url_scrapper =  ScrapeWebPage(chatData.link)
         url_list, base_url = url_scrapper.get_url()
         processed_url = url_scrapper.process_urls(url_list=url_list, base_url=base_url)
         content_scrapped_from_url = url_scrapper.get_page_contents_markdown(set(processed_url[:5]))
@@ -109,9 +111,9 @@ async def chat(
         faiss_db.save_local(faiss_)
 
     print(faiss_)
-    docs = faiss_db.similarity_search(query, k=1)
+    docs = faiss_db.similarity_search(chatData.query, k=1)
     print(f"Result obtained from Similarity: {docs}")
-    response_answer = openai_response.generate_markdown_response(query, docs)
+    response_answer = openai_response.generate_markdown_response(chatData.query, docs)
     
     response = {
         "result": response_answer,
