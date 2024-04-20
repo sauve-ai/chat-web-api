@@ -6,7 +6,8 @@ from app.routes import (
     signup, 
     fetchurl,
     get_login_token, 
-    chatbot
+    chatbot, 
+    suggest_question
     )
 
 import uvicorn
@@ -37,7 +38,7 @@ app.include_router(signup.router)
 app.include_router(fetchurl.router)
 app.include_router(get_login_token.routes)
 app.include_router(chatbot.routes)
-
+app.include_router(suggest_question.router)
 
 if __name__ == "__main__":
     uvicorn.run(
