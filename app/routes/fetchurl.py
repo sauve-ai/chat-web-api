@@ -86,12 +86,21 @@ async def fetch_url(
     )
     if not db_request_user:
         ##create user plan
-        user_plan = create_user_plan_request(
-            user_id= user_id,
-            request= 1,
-            db= db,
-            plan_id=0
-        )
+        try:
+            user_plan = create_user_plan_request(
+                user_id= user_id,
+                request= 0,
+                db= db,
+                plan_id=0
+            )
+            print(user_plan)
+        except Exception as e:
+            print("Warning: FALL back while updating fetch url table.")
+            raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="Something went wrong while creating user request. Please try again later.",
+                    )
+        
     else:
         ## increase the request for the particular user
         db_plan = db_request_user.plan_id
@@ -108,11 +117,26 @@ async def fetch_url(
                         status_code=status.HTTP_403_FORBIDDEN,
                         detail="Max limit of request exceed.",
                     )
-        
-    base_url = url_request.base_url
-    tai_scraper = scrape_url.ScrapeWebPage(base_url)
-    url_list, base_url = tai_scraper.get_url()
-    processed_url = tai_scraper.process_urls(url_list=url_list, base_url=base_url)
-    # content = tai_scraper.get_page_contents(url_list = set(processed_url))
-    response = {"success": "true", "urls": processed_url}
-    return response
+
+    try:    
+        base_url = url_request.base_url
+        tai_scraper = scrape_url.ScrapeWebPage(base_url)
+        url_list, base_url = tai_scraper.get_url()
+        processed_url = tai_scraper.process_urls(url_list=url_list, base_url=base_url)
+        # content = tai_scraper.get_page_contents(url_list = set(processed_url))
+        response = {"success": "true", "urls": processed_url}
+        return response
+    except Exception as e:
+        print(f"WARNING: Exception occured {e}")
+        print("GEnerating the fallback for fetch url.")
+        user_request = db_request_user.request
+        if user_request !=0:
+            db_request_user.request-=1
+            db.add(db_request_user)
+            db.commit()
+            print("database updateed")
+            raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="Something went wrong while processing url.",
+                    )
+
