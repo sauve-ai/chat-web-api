@@ -25,6 +25,7 @@ from app.services.chatbot import openai_response
 from app.services.chatbot import vector_store
 from app.services.scraper.scrape_url import ScrapeWebPage
 from app.services.chatbot.get_base_url import get_base_url
+from app.services.schema import chatbotrequest
 
 import os
 
@@ -37,13 +38,13 @@ embeddings = HuggingFaceEmbeddings(model_name = "sentence-transformers/msmarco-d
 
 @routes.post("/api/v1/chat/", tags=["chatbot"], status_code=HTTPStatus.OK)
 async def chat(
-    link: str,
-    query: str,
+    chatData:chatbotrequest,
+  
     current_user_credential: str = Depends(JWTBearer()),
     db: Session = Depends(get_db)
 ):
     try:
-        base_url, url_name = get_base_url(link)
+        base_url, url_name = get_base_url(chatData.link)
     except Exception as e:
         raise HTTPException(
                         status_code= status.HTTP_404,
@@ -88,8 +89,6 @@ async def chat(
                         detail="Max limit of request exceed.",
                     )
             
-
-    
     faiss_ = os.path.join("faiss_index", f"{db_chatbot_plan_user_id.user_id}_{url_name}")
     print(faiss_)
     if os.path.exists(faiss_):
@@ -97,7 +96,6 @@ async def chat(
         faiss_db = FAISS.load_local(faiss_, embeddings, allow_dangerous_deserialization=True)
         ## save the fasiis index
     else:
-
         try:
             print("here")
             url_scrapper =  ScrapeWebPage(link)

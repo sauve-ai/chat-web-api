@@ -10,6 +10,10 @@ python-jose==3.3.0
 openai==1.14.3
 faiss-cpu==1.8.0
 html2text==2024.2.26
+langchain==0.1.16
+sentence-transformers==2.6.1
+
+
 # pandas
 # openai
 # # streamlit
