@@ -23,8 +23,14 @@ class ScrapeWebPage:
     def get_url(self):
         base_url = ScrapeWebPage.extract_base_url(self.url)
         print(f"BASE URL:{base_url}")
-        reqs = requests.get(self.url)
+
+        headers = {
+                "User-Agent":
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.19582"
+            } 
+        reqs = requests.get(self.url,  headers=headers, allow_redirects=True, timeout=None)
         soup = BeautifulSoup(reqs.text, "html.parser")
+        # print(soup)
         urls = []
         for link in soup.find_all("a"):
             urls.append(link.get("href"))
@@ -94,8 +100,14 @@ class ScrapeWebPage:
         return s
     
 
-# tai_scraper = ScrapeWebPage("https://www.wiseadmit.io/")
+# tai_scraper = ScrapeWebPage("https://tai.com.np")
 # url_list, base_url = tai_scraper.get_url()
-# processed_url = tai_scraper.process_urls(url_list=url_list, base_url=base_url)
+# # processed_url = tai_scraper.process_urls(url_list=url_list, base_url=base_url)
 # # content = tai_scraper.get_page_contents(url_list = set(processed_url))
-# print(processed_url)
+# print(url_list)
+
+
+# with requests.session() as s:
+#     for i in range(0,3):
+#         res = s.get("https://tai.com.np")
+#         print(res.text)

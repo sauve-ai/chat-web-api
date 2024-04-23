@@ -65,7 +65,7 @@ async def chat(
         ##create user plan
         user_plan = create_user_chatbot_plan(
             user_id= user_id,
-            chat_request= 1,
+            chat_request= 0,
             db= db,
             plan_id=0
         )
@@ -89,7 +89,7 @@ async def chat(
                     )
             
 
-
+    
     faiss_ = os.path.join("faiss_index", f"{db_chatbot_plan_user_id.user_id}_{url_name}")
     print(faiss_)
     if os.path.exists(faiss_):
@@ -97,28 +97,62 @@ async def chat(
         faiss_db = FAISS.load_local(faiss_, embeddings, allow_dangerous_deserialization=True)
         ## save the fasiis index
     else:
-        print("here")
-        url_scrapper =  ScrapeWebPage(link)
-        url_list, base_url = url_scrapper.get_url()
-        processed_url = url_scrapper.process_urls(url_list=url_list, base_url=base_url)
-        content_scrapped_from_url = url_scrapper.get_page_contents_markdown(set(processed_url[:5]))
 
-        vector_obj = vector_store.VectorSearch(data=content_scrapped_from_url, model_name="sentence-transformers/msmarco-distilbert-base-v3")
-        docs, metadatas = vector_obj._split_data_markdown()  
-        faiss_db = vector_obj._faiss_search() ## this si the fiass index
-        faiss_db.save_local(faiss_)
+        try:
+            print("here")
+            url_scrapper =  ScrapeWebPage(link)
+            url_list, base_url = url_scrapper.get_url()
+            try:
+                processed_url = url_scrapper.process_urls(url_list=url_list, base_url=base_url)
+                if len(processed_url)<=1:
+                    return HTTPException(
+                        status_code=500,
+                        detail="Something went wrong while scrapping url. Please try with Different one"
+                    )
+            except Exception as e:
+                print("WARNING: FAILED scraping the web url")
 
-    print(faiss_)
-    docs = faiss_db.similarity_search(query, k=1)
-    print(f"Result obtained from Similarity: {docs}")
-    response_answer = openai_response.generate_markdown_response(query, docs)
-    
-    response = {
-        "result": response_answer,
-        "link": "",
+                return HTTPException(
+                        status_code=500,
+                        detail="Something went wrong while scrapping url. Please try with Different one"
+                    )
+
+
+            content_scrapped_from_url = url_scrapper.get_page_contents_markdown(set(processed_url))
+
+            vector_obj = vector_store.VectorSearch(data=content_scrapped_from_url, model_name="sentence-transformers/msmarco-distilbert-base-v3")
+            docs, metadatas = vector_obj._split_data_markdown()  
+            faiss_db = vector_obj._faiss_search() ## this si the fiass index
+            print("INFO: Saving the faiss index.")
+            faiss_db.save_local(faiss_)
+            print("INFO: Faiss saved successfully")
+
+        except Exception as e:
+            print(f"WARNING: Something went wrong {e}")
+            return HTTPException(
+                        status_code=500,
+                        detail="Something went wrong while creating user request. Please try again later."
+                    )
+
+    try:
+        print("INFO: Searching for the similar content.")
+        docs = faiss_db.similarity_search(query, k=1)
+        print(f"Result obtained from Similarity: {docs}")
+        # response_answer = openai_response.generate_markdown_response(query, docs)
         
-    }
-    return response
+        response = {
+            "result": "hellow",
+            "link": "",
+
+        }
+        return response
+    except Exception as e:
+        print(f"Warning: Error occured {e}")
+        return HTTPException(
+                        status_code=500,
+                        detail="Something went wrong. Please try again later."
+                    )
+              
 
 
 
