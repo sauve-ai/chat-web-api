@@ -134,9 +134,9 @@ async def chat(
 
     try:
         print("INFO: Searching for the similar content.")
-        docs = faiss_db.similarity_search(query, k=1)
+        docs = faiss_db.similarity_search(chatData.query, k=1)
         print(f"Result obtained from Similarity: {docs}")
-        # response_answer = openai_response.generate_markdown_response(query, docs)
+        response_answer = openai_response.generate_markdown_response(query, docs)
         
         response = {
             "result": "hellow",
