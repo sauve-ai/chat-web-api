@@ -98,7 +98,7 @@ async def chat(
     else:
         try:
             print("here")
-            url_scrapper =  ScrapeWebPage(link)
+            url_scrapper =  ScrapeWebPage(chatData.link)
             url_list, base_url = url_scrapper.get_url()
             try:
                 processed_url = url_scrapper.process_urls(url_list=url_list, base_url=base_url)
