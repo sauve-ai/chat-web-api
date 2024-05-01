@@ -139,7 +139,7 @@ async def chat(
         response_answer = openai_response.generate_markdown_response(chatData.query, docs)
         
         response = {
-            "result": "hellow",
+            "result": response_answer,
             "link": "",
 
         }
