@@ -123,12 +123,30 @@ def create_reset_password_token(
     db.commit()
     db.refresh(db_reset_token)
 
-def get_user_reset_password(
+def is_valid_reset_token(
         db: Session,
         token: str
-):
+)->bool|str:
     reset_token = db.query(models.PasswordResetToken).filter(models.PasswordResetToken.token == token).first()
-    if not reset_token or reset_token.expires_at < datetime.now(timezone.utc):
-        return "Invalid"
+    # TODO: need to add a time constraint to the reset token.
+    if not reset_token:
+        return False
     else: 
-        return "Valid"
+        return db.query(models.User).filter(models.User.user_id == reset_token.user_id).first()
+
+def reset_password(
+        db: Session,
+        user_id: int, 
+        hashed_pass: str, 
+        reset_token: str
+):
+    user = db.query(models.User).filter(models.User.user_id == user_id).first()
+    user.password = hashed_pass
+    db.commit()
+    reset_token = db.query(models.PasswordResetToken).filter(models.PasswordResetToken.token == reset_token).first()
+    db.delete(reset_token)
+    db.commit()
+    return True
+
+
+

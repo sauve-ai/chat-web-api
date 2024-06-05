@@ -3,8 +3,7 @@ from sqlalchemy.orm import Session
 from http import HTTPStatus
 from app.db_utils import models, utils
 from app.db_utils.database import SessionLocal, engine
-from app.db_utils.models import PasswordResetToken
-from app.services import schema
+from app.services.schema import ForgotPasswordRequest 
 from pydantic import BaseModel
 from typing import Dict
 import uuid
@@ -12,9 +11,6 @@ from datetime import datetime, timedelta, timezone
 
 models.Base.metadata.create_all(bind=engine)
 router  = APIRouter()
-
-class ForgotPasswordRequest(BaseModel):
-    email: str
 
 reset_tokens: Dict[str, str] = {}
 
@@ -26,7 +22,7 @@ def get_db():
     finally:
         db.close()
         
-@router.post("/api/v1/forgot_password/", tags=["Reset Password"])
+@router.post("/api/v1/forgot_password/", tags=["Forgot Password"])
 def forgot_password(request:ForgotPasswordRequest, db: Session = Depends(get_db)):
     email = request.email
     db_user = utils.get_user_by_email(
@@ -38,6 +34,8 @@ def forgot_password(request:ForgotPasswordRequest, db: Session = Depends(get_db)
     else:
         reset_token = str(uuid.uuid4())
         expires_at = datetime.now(timezone.utc)  + timedelta(hours=1)
+        print("current time: ", datetime.now(timezone.utc))
+        print("Expires at", expires_at)
         utils.create_reset_password_token(
             db= db, 
             user_id= db_user.user_id, 

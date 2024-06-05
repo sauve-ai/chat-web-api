@@ -4,40 +4,40 @@ from sqlalchemy.orm import Session
 from http import HTTPStatus
 from app.db_utils import models, utils
 from app.db_utils.database import SessionLocal, engine
-from app.db_utils.models import PasswordResetToken
-from app.services import schema
+from app.services.schema import ResetPasswordRequest
 from app.services.utils import hash_pass
 from pydantic import BaseModel
 from typing import Dict
 import uuid
 from datetime import datetime, timedelta, timezone
 
+models.Base.metadata.create_all(bind=engine)
+router  = APIRouter()
 
-class ResetPasswordRequest(BaseModel):
-    token: str
-    new_password: str
-
+def get_db():
+    """Get database connection"""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
     
-@app.post("/reset-password/")
+@router.post("/api/v1/reset_password/", tags=["Reset Password"])
 def reset_password(request: ResetPasswordRequest, db: Session = Depends(get_db)):
-    email = request.email
-    db_user = utils.get_user_by_email(
-        db=db,
-        email=email
-    )
-    reset_token = db.query(PasswordResetToken).filter(PasswordResetToken.token == request.token).first()
-    if not reset_token or reset_token.expires_at < datetime.utcnow():
-        raise HTTPException(status_code=400, detail="Invalid or expired token")
 
-    user = db.query(User).filter(User.id == reset_token.user_id).first()
-    if not user:
+    token_valid_user = utils.is_valid_reset_token(db=db, 
+                                 token=request.token)
+
+    if not token_valid_user:
         raise HTTPException(status_code=404, detail="User not found")
-
-    hashed_password = bcrypt.hashpw(request.new_password.encode('utf-8'), bcrypt.gensalt())
-    user.hashed_password = hashed_password.decode('utf-8')
-    db.commit()
-
-    db.delete(reset_token)
-    db.commit()
-
-    return {"message": "Password has been reset"}
+    
+    hashed_pass = hash_pass(request.new_password)
+    # TODO: reset password is not working the databse is not updating.
+    password_reset = utils.reset_password(
+        db = db,
+        user_id = token_valid_user,
+        hashed_pass = hashed_pass,
+        reset_token= request.token
+        )
+    if password_reset:
+        return {"message": "Password has been reset"}
