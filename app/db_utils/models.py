@@ -1,6 +1,6 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, TIMESTAMP, func
 from sqlalchemy.orm import relationship
-
+from sqlalchemy.ext.declarative import declarative_base
 from app.db_utils.database import Base
 
 
@@ -43,6 +43,17 @@ class ChatbotPlan(Base):
     user_id = Column(Integer, ForeignKey("users.user_id"), primary_key=True)
     chat_request = Column(Integer, index=True)
     plan_id = Column(Integer, index=True)
+
+class PasswordResetToken(Base):
+    __tablename__ = 'password_reset_tokens'
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey('users.user_id', ondelete='CASCADE'), nullable=False)
+    token = Column(String, unique=True, index=True, nullable=False)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+    expires_at = Column(TIMESTAMP, nullable=False)
+
+    user = relationship("User")
 
 
 
