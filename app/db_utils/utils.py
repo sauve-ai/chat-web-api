@@ -140,9 +140,13 @@ def reset_password(
         hashed_pass: str, 
         reset_token: str
 ):
+
     user = db.query(models.User).filter(models.User.user_id == user_id).first()
+    print("USER UTILS: ", user.password)
     user.password = hashed_pass
     db.commit()
+    print("PASSWORD RESET DONE")
+
     reset_token = db.query(models.PasswordResetToken).filter(models.PasswordResetToken.token == reset_token).first()
     db.delete(reset_token)
     db.commit()
