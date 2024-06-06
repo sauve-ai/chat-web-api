@@ -32,9 +32,6 @@ def reset_password(request: ResetPasswordRequest, db: Session = Depends(get_db))
         raise HTTPException(status_code=404, detail="User not found")
     
     hashed_pass = hash_pass(request.new_password)
-    print("HASH", hashed_pass)
-    print("USER", token_valid_user)
-    print("TOKEN", request.token)
     password_reset = utils.reset_password(
         db = db,
         user_id = token_valid_user.user_id,
