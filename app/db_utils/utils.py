@@ -1,9 +1,14 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from app.db_utils import models
+from datetime import datetime, timezone
 
 def get_user_by_user_id(db, user_id: int):
     return db.query(models.User).filter(models.User.user_id == user_id).first()
+
+def get_token_with_user_id(db, user_id:int):
+    return db.query(models.PasswordResetToken).filter(models.PasswordResetToken.token == request.token).first()
 
 ##TODO: Make this one
 def get_user_by_user_name(db, username: int):
@@ -17,6 +22,7 @@ def get_user_by_userid_request_table(db, user_id:int):
     
 def get_user_by_userid_chatbot_plan(db, user_id:int):
     return db.query(models.ChatbotPlan).filter(models.ChatbotPlan.user_id == user_id).first()
+
 
 def create_user(
         db: Session,
@@ -101,3 +107,50 @@ def create_user_chatbot_plan(
     db.add(db_user_chatbot_plan)
     db.commit()
     db.refresh(db_user_chatbot_plan)
+
+def create_reset_password_token(
+        db: Session, 
+        user_id: int, 
+        reset_token:str, 
+        expire_time:datetime
+): 
+    db_reset_token = models.PasswordResetToken(
+        user_id=user_id,
+        token= reset_token,
+        expires_at = expire_time
+    )
+    db.add(db_reset_token)
+    db.commit()
+    db.refresh(db_reset_token)
+
+def is_valid_reset_token(
+        db: Session,
+        token: str
+)->bool|str:
+    reset_token = db.query(models.PasswordResetToken).filter(models.PasswordResetToken.token == token).first()
+    # TODO: need to add a time constraint to the reset token.
+    if not reset_token:
+        return False
+    else: 
+        return db.query(models.User).filter(models.User.user_id == reset_token.user_id).first()
+
+def reset_password(
+        db: Session,
+        user_id: int, 
+        hashed_pass: str, 
+        reset_token: str
+):
+
+    user = db.query(models.User).filter(models.User.user_id == user_id).first()
+    user.password = hashed_pass
+    db.commit()
+    print("PASSWORD RESET DONE")
+
+    reset_token = db.query(models.PasswordResetToken).filter(models.PasswordResetToken.token == reset_token).first()
+    db.delete(reset_token)
+    print("Token delete DONE")
+    db.commit()
+    return True
+
+
+

@@ -1,10 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from http import HTTPStatus
-from app.db_utils import models, utils
+from app.db_utils import models
 from app.db_utils.database import SessionLocal, engine
-from app.services import schema
-from app.services.utils import hash_pass
 from app.services.scraper.scrape_url import ScrapeWebPage
 from app.services.chatbot.openai_response import get_chat_response
 
