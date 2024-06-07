@@ -8,7 +8,7 @@ class ScrapeWebPage:
     """Scrapes the Web page and processes it as required.
     """
     def __init__(self, url) -> None:
-        self.url =url
+        self.url =url.strip()
     
     @staticmethod
     def extract_base_url(url:str)->str:
@@ -21,6 +21,8 @@ class ScrapeWebPage:
             raise Exception("Invalid URL.")
         
     def get_url(self):
+        if not self.url.startswith("https://"):
+            self.url = "https://" + self.url
         base_url = ScrapeWebPage.extract_base_url(self.url)
         print(f"BASE URL:{base_url}")
 
@@ -100,7 +102,7 @@ class ScrapeWebPage:
         return s
     
 
-# tai_scraper = ScrapeWebPage("https://tai.com.np")
+# tai_scraper = ScrapeWebPage("tai.com.np")
 # url_list, base_url = tai_scraper.get_url()
 # # processed_url = tai_scraper.process_urls(url_list=url_list, base_url=base_url)
 # # content = tai_scraper.get_page_contents(url_list = set(processed_url))
