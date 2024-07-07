@@ -22,7 +22,7 @@ from app.db_utils.utils import (
                                 )
 from app.services.utils import JWTBearer
 from app.services.chatbot import openai_response
-from app.services.chatbot import vector_store
+from app.services.chatbot import vector_store, extract_markdown
 from app.services.scraper.scrape_url import ScrapeWebPage
 from app.services.chatbot.get_base_url import get_base_url
 from app.services.schema import chatbotrequest
@@ -116,7 +116,7 @@ async def chat(
                     )
 
 
-            content_scrapped_from_url = url_scrapper.get_page_contents_markdown(set(processed_url))
+            content_scrapped_from_url = await extract_markdown.get_page_contents_markdown(set(processed_url))
 
             vector_obj = vector_store.VectorSearch(data=content_scrapped_from_url, model_name="sentence-transformers/msmarco-distilbert-base-v3")
             docs, metadatas = vector_obj._split_data_markdown()  
