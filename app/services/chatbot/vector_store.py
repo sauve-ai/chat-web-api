@@ -11,7 +11,7 @@ class VectorSearch:
     
     def _split_data(self):
         
-        text_splitter = CharacterTextSplitter(chunk_size=1500, separator='/n')
+        text_splitter = CharacterTextSplitter(chunk_size=1500, separator='\n')
         self.docs, self.metadatas = [], []
         for page in self.data:
             splits = text_splitter.split_text(page['text'])
@@ -21,7 +21,7 @@ class VectorSearch:
     
     def _split_data_markdown(self):
 
-        text_splitter = CharacterTextSplitter(chunk_size=1500, separator='/n')
+        text_splitter = CharacterTextSplitter(chunk_size=1500, separator='\n')
         self.docs, self.metadatas = [], []
         for page in self.data:
             splits = text_splitter.split_text(page['text'].lower())
