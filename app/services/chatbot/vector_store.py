@@ -1,7 +1,18 @@
-from langchain.text_splitter import CharacterTextSplitter, MarkdownHeaderTextSplitter
+from langchain.text_splitter import CharacterTextSplitter, MarkdownHeaderTextSplitter, RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
+from transformers import AutoTokenizer
 
-
+MARKDOWN_SEPARATORS = [
+    "\n#{1,6} ",
+    "```\n",
+    "\n\\*\\*\\*+\n",
+    "\n---+\n",
+    "\n___+\n",
+    "\n\n",
+    "\n",
+    " ",
+    "",
+]
 class VectorSearch:
     def __init__(self, data:list, model_name:str) -> None:
         from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -11,7 +22,7 @@ class VectorSearch:
     
     def _split_data(self):
         
-        text_splitter = CharacterTextSplitter(chunk_size=1500, separator='/n')
+        text_splitter = CharacterTextSplitter(chunk_size=1500, separator='\n')
         self.docs, self.metadatas = [], []
         for page in self.data:
             splits = text_splitter.split_text(page['text'])
@@ -21,7 +32,7 @@ class VectorSearch:
     
     def _split_data_markdown(self):
 
-        text_splitter = CharacterTextSplitter(chunk_size=1500, separator='/n')
+        text_splitter = CharacterTextSplitter(chunk_size=1500, separator='\n')
         self.docs, self.metadatas = [], []
         for page in self.data:
             splits = text_splitter.split_text(page['text'].lower())

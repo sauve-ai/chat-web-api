@@ -7,7 +7,7 @@ from http import HTTPStatus
 
 from sqlalchemy.orm import Session
 
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
 
 from app.services.chatbot.openai_response import get_ai_response, generate_markdown_response
@@ -22,13 +22,13 @@ from app.db_utils.utils import (
                                 )
 from app.services.utils import JWTBearer
 from app.services.chatbot import openai_response
-from app.services.chatbot import vector_store
+from app.services.chatbot import vector_store, extract_markdown
 from app.services.scraper.scrape_url import ScrapeWebPage
 from app.services.chatbot.get_base_url import get_base_url
 from app.services.schema import chatbotrequest
 
 import os
-
+import json
 
 routes = APIRouter()
 
@@ -116,7 +116,7 @@ async def chat(
                     )
 
 
-            content_scrapped_from_url = url_scrapper.get_page_contents_markdown(set(processed_url))
+            content_scrapped_from_url = await extract_markdown.get_page_contents_markdown(set(processed_url))
 
             vector_obj = vector_store.VectorSearch(data=content_scrapped_from_url, model_name="sentence-transformers/msmarco-distilbert-base-v3")
             docs, metadatas = vector_obj._split_data_markdown()  
@@ -134,15 +134,19 @@ async def chat(
 
     try:
         print("INFO: Searching for the similar content.")
-        docs = faiss_db.similarity_search(chatData.query, k=1)
-        print(f"Result obtained from Similarity: {docs}")
-        response_answer = openai_response.generate_markdown_response(chatData.query, docs)
+        docs = faiss_db.similarity_search(chatData.query, k=2)
         
-        response = {
-            "result": "hellow",
-            "link": "",
+        print(f"Result obtained from Similarity: {docs}")
 
-        }
+        sources = []
+
+        for source_idx in range(len(docs)):
+            sources.append(docs[source_idx].metadata["source"])
+
+        response_answer = openai_response.generate_markdown_response(chatData.query, docs[0])
+        response = json.loads(response_answer)
+        response["sources"] = sources
+
         return response
     except Exception as e:
         print(f"Warning: Error occured {e}")
