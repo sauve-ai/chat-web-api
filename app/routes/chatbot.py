@@ -134,10 +134,18 @@ async def chat(
 
     try:
         print("INFO: Searching for the similar content.")
-        docs = faiss_db.similarity_search(chatData.query, k=1)
+        docs = faiss_db.similarity_search(chatData.query, k=2)
+        
         print(f"Result obtained from Similarity: {docs}")
-        response_answer = openai_response.generate_markdown_response(chatData.query, docs)
+
+        sources = []
+
+        for source_idx in range(len(docs)):
+            sources.append(docs[source_idx].metadata["source"])
+
+        response_answer = openai_response.generate_markdown_response(chatData.query, docs[0])
         response = json.loads(response_answer)
+        response["sources"] = sources
 
         return response
     except Exception as e:
