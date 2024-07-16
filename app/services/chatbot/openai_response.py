@@ -65,10 +65,15 @@ _PROMPT_TEMPLATE_MARKDOWN = """
     Please answer the question, and make sure you follow ALL of the rules below:
     1. Answer the questions only based on context provided, do not make things up
     2. Answer questions in a helpful manner that straight to the point, with clear structure & all relevant information that might help users answer the question
-    3. Anwser should be formatted in Markdown
-    4. If there are relevant images, video, links, they are very important reference data, please include them as part of the answer
+    3. If there are relevant images, video, links, they are very important reference data, please include them as part of the answer, in the image placeholder.
     QUESTION: {question}
-    ANSWER (formatted in markdown):
+
+    Please stricty follow the given JSON format for your response.
+    {{
+    "answer" : "opeai answer response",
+    "image": ["list of images"]
+    ...
+    }}
     """
 
 def generate_markdown_response(
@@ -91,7 +96,9 @@ def generate_markdown_response(
                                         {"role": "user", "content": (prompt_markdown)},        
                                     ], 
                                     temperature=0.5,
+                                    response_format={"type": "json_object"}
                                     )
+  
 
     
     return response.choices[0].message.content

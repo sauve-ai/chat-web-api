@@ -7,7 +7,7 @@ from http import HTTPStatus
 
 from sqlalchemy.orm import Session
 
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
 
 from app.services.chatbot.openai_response import get_ai_response, generate_markdown_response
@@ -28,7 +28,7 @@ from app.services.chatbot.get_base_url import get_base_url
 from app.services.schema import chatbotrequest
 
 import os
-
+import json
 
 routes = APIRouter()
 
@@ -137,12 +137,8 @@ async def chat(
         docs = faiss_db.similarity_search(chatData.query, k=1)
         print(f"Result obtained from Similarity: {docs}")
         response_answer = openai_response.generate_markdown_response(chatData.query, docs)
-        
-        response = {
-            "result": "hellow",
-            "link": "",
+        response = json.loads(response_answer)
 
-        }
         return response
     except Exception as e:
         print(f"Warning: Error occured {e}")
