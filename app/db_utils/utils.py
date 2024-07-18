@@ -107,6 +107,7 @@ def create_user_chatbot_plan(
     db.add(db_user_chatbot_plan)
     db.commit()
     db.refresh(db_user_chatbot_plan)
+    return db_user_chatbot_plan
 
 def create_reset_password_token(
         db: Session, 
