@@ -105,7 +105,7 @@ class ScrapeWebPage:
                 "User-Agent":
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.19582"
             } 
-        reqs = requests.get(self.url,  headers=headers, allow_redirects=True, timeout=None)
+        reqs = requests.get(self.url,  headers=headers, allow_redirects=True, timeout=5)
         soup = BeautifulSoup(reqs.text, "html.parser")
         # print(soup)
         urls = []

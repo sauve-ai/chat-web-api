@@ -62,6 +62,8 @@ async def chat(
     )
 
     print("This is the db_user: ",db_chatbot_plan_user_id)
+    new_user_status = False
+
     if not db_chatbot_plan_user_id:
         ##create user plan
         user_plan = create_user_chatbot_plan(
@@ -70,7 +72,7 @@ async def chat(
             db= db,
             plan_id=0
         )
-        print(user_plan)
+        new_user_status = True
     else:
         ## increase the request for the particular user
         db_plan = db_chatbot_plan_user_id.plan_id
@@ -88,8 +90,11 @@ async def chat(
                         status_code=status.HTTP_403_FORBIDDEN,
                         detail="Max limit of request exceed.",
                     )
-            
-    faiss_ = os.path.join("faiss_index", f"{db_chatbot_plan_user_id.user_id}_{url_name}")
+
+    if not new_user_status:     
+        faiss_ = os.path.join("faiss_index", f"{db_chatbot_plan_user_id.user_id}_{url_name}")
+    else:
+        faiss_ = os.path.join("faiss_index", f"{user_plan.user_id}_{url_name}")
     print(faiss_)
     if os.path.exists(faiss_):
         ##get urls;
@@ -136,7 +141,7 @@ async def chat(
         print("INFO: Searching for the similar content.")
         docs = faiss_db.similarity_search(chatData.query, k=2)
         
-        print(f"Result obtained from Similarity: {docs}")
+        # print(f"Result obtained from Similarity: {docs}")
 
         sources = []
 
